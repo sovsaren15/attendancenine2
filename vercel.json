@@ -1,14 +1,9 @@
 {
   "builds": [
     {
-      "src": "*app.py",
-      "use": "@vercel/python"
+      "src": "build.sh",
+      "use": "@vercel/static-build"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "index.py"
-    }
-  ]
+  "buildCommand": "chmod +x build.sh && ./build.sh"
 }
