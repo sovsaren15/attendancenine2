@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register Employee - Smart Attendance</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ff6b9d 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3e%3cg fill='none' fill-rule='evenodd'%3e%3cg fill='%23ffffff' fill-opacity='0.05'%3e%3ccircle cx='30' cy='30' r='2'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e");
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-glow {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .input-glow:focus {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2), 0 8px 25px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .video-container {
+            position: relative;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(102, 126, 234, 0.05) 100%);
+            pointer-events: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ff6b9d 100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 50%, #EC4899 100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-secondary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .btn-secondary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.4);
+        }
+        
+        .floating-label {
+            position: relative;
+        }
+        
+        .floating-label input,
+        .floating-label select,
+        .floating-label textarea {
+            padding: 1.5rem 1rem 0.75rem 1rem;
+        }
+        
+        .floating-label label {
+            position: absolute;
+            top: 50%;
+            left: 1rem;
+            font-size: 1rem;
+            color: #6B7280;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 500;
+        }
+        
+        .floating-label input:focus + label,
+        .floating-label select:focus + label,
+        .floating-label textarea:focus + label,
+        .floating-label input:not(:placeholder-shown) + label,
+        .floating-label select:not([value=""]) + label,
+        .floating-label textarea:not(:placeholder-shown) + label {
+            top: 0.5rem;
+            font-size: 0.75rem;
+            transform: translateY(0);
+            font-weight: 600;
+        }
+        
+        .pulse-animation {
+            animation: pulseGlow 3s infinite;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            }
+            50% { 
+                opacity: 0.8;
+                transform: scale(1.05);
+                box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
+            }
+        }
+        
+        .slide-in {
+            animation: slideInAdvanced 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideInAdvanced {
+            from {
+                opacity: 0;
+                transform: translateY(30px) rotateX(10deg);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) rotateX(0);
+            }
+        }
+        
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .title-glow {
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        
+        .section-header {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #ff6b9d);
+            border-radius: 2px;
+        }
+        
+        .camera-pulse {
+            animation: cameraPulse 2s infinite;
+        }
+        
+        @keyframes cameraPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg">
+    <div class="floating-particles">
+        <div class="particle" style="left: 10%; width: 4px; height: 4px; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; width: 6px; height: 6px; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 30%; width: 3px; height: 3px; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 40%; width: 5px; height: 5px; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 50%; width: 4px; height: 4px; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 60%; width: 6px; height: 6px; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 70%; width: 3px; height: 3px; animation-delay: 6s;"></div>
+        <div class="particle" style="left: 80%; width: 5px; height: 5px; animation-delay: 7s;"></div>
+        <div class="particle" style="left: 90%; width: 4px; height: 4px; animation-delay: 8s;"></div>
+    </div>
+    
+    <div class="container mx-auto p-6 relative z-10">
+        <!-- Logo in top-left corner -->
+        <div class="absolute top-6 left-6 z-20">
+            <a href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Company Logo" class="h-12 w-auto">
+            </a>
+        </div>
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-10 slide-in">
+                <h1 class="text-5xl font-bold text-white mb-4 title-glow">Employee Registration</h1>
+                <p class="text-white text-opacity-90 text-lg">Join our innovative smart attendance ecosystem</p>
+                <div class="w-24 h-1 bg-gradient-to-r from-white to-transparent mx-auto mt-4 rounded"></div>
+            </div>
+            
+            <div class="glass-card rounded-3xl p-10 shadow-2xl slide-in">
+                <div class="grid lg:grid-cols-2 gap-10">
+                    <div class="space-y-8">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-8 section-header">Personal Information</h2>
+                        
+                        <div class="floating-label">
+                            <input type="text" id="name" placeholder=" " class="w-full px-4 py-4 border-2 rounded-2xl focus:outline-none input-glow transition-all duration-300" required>
+                            <label for="name">Full Name</label>
+                        </div>
+                        
+                        <div class="floating-label">
+                            <select id="gender" class="w-full px-4 py-4 border-2 rounded-2xl focus:outline-none input-glow transition-all duration-300" required>
+                                <option value="" disabled selected></option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <label for="gender">Gender</label>
+                        </div>
+                        
+                        <div class="floating-label">
+                            <input type="date" id="date_of_birth" placeholder=" " class="w-full px-4 py-4 border-2 rounded-2xl focus:outline-none input-glow transition-all duration-300" required>
+                            <label for="date_of_birth">Date of Birth</label>
+                        </div>
+                        
+                        <div class="floating-label">
+                            <input type="text" id="position" placeholder=" " class="w-full px-4 py-4 border-2 rounded-2xl focus:outline-none input-glow transition-all duration-300" required>
+                            <label for="position">Position</label>
+                        </div>
+                        
+                        <div class="floating-label">
+                            <textarea id="address" placeholder=" " rows="4" class="w-full px-4 py-4 border-2 rounded-2xl focus:outline-none input-glow transition-all duration-300 resize-none" required></textarea>
+                            <label for="address">Address</label>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-8">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-8 section-header">Photo Capture</h2>
+                        
+                        <div class="video-container rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-gray-800 to-gray-900">
+                            <video id="video" width="100%" height="360" autoplay class="w-full h-96 object-cover"></video>
+                            <div class="video-overlay"></div>
+                            <canvas id="canvas" class="hidden"></canvas>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="inline-block p-2 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 camera-pulse">
+                                <div class="bg-white rounded-full p-3">
+                                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0118.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-gray-700 mt-4 font-medium">Position yourself in the center of the frame</p>
+                            <p class="text-gray-500 text-sm mt-1">Make sure your face is clearly visible</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center space-x-6 mt-12 pt-8 border-t border-gray-200">
+                    <button id="capture" class="btn-primary text-white px-10 py-4 rounded-2xl font-bold shadow-2xl flex items-center space-x-3 text-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0118.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span>Capture & Register</span>
+                    </button>
+                    
+                    <a href="/" class="btn-secondary text-white px-10 py-4 rounded-2xl font-bold shadow-2xl flex items-center space-x-3 text-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        <span>Back</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const capture = document.getElementById('capture');
+        const nameInput = document.getElementById('name');
+        const genderInput = document.getElementById('gender');
+        const dobInput = document.getElementById('date_of_birth');
+        const positionInput = document.getElementById('position');
+        const addressInput = document.getElementById('address');
+
+        // Initialize camera
+        navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+            .then(stream => {
+                video.srcObject = stream;
+                video.setAttribute('playsinline', '');
+            })
+            .catch(err => {
+                console.error('Camera access denied:', err);
+                showNotification('Camera access denied. Please allow camera access and refresh the page.', 'error');
+            });
+
+        // Enhanced notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-6 right-6 z-50 p-5 rounded-2xl shadow-2xl transition-all duration-500 transform translate-x-full max-w-sm backdrop-blur-lg`;
+            
+            const bgColor = type === 'error' ? 'bg-gradient-to-r from-red-500 to-pink-500' : 
+                           type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 
+                           'bg-gradient-to-r from-blue-500 to-purple-500';
+            notification.className += ` ${bgColor} text-white`;
+            
+            const icon = type === 'error' ? 
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>' :
+                type === 'success' ?
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>' :
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+            
+            notification.innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            ${icon}
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-semibold text-sm">${message}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+                notification.classList.add('translate-x-0');
+            }, 100);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                notification.classList.remove('translate-x-0');
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 500);
+            }, 5000);
+        }
+
+        // Enhanced form validation
+        function validateForm() {
+            const fields = [
+                { element: nameInput, name: 'Name' },
+                { element: genderInput, name: 'Gender' },
+                { element: dobInput, name: 'Date of Birth' },
+                { element: positionInput, name: 'Position' },
+                { element: addressInput, name: 'Address' }
+            ];
+            
+            for (let field of fields) {
+                if (!field.element.value.trim()) {
+                    field.element.focus();
+                    field.element.classList.add('border-red-500', 'shake');
+                    setTimeout(() => {
+                        field.element.classList.remove('border-red-500', 'shake');
+                    }, 3000);
+                    showNotification(`Please enter ${field.name}.`, 'error');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Enhanced capture functionality
+        capture.addEventListener('click', () => {
+            if (!validateForm()) return;
+            
+            // Add loading state with enhanced animation
+            capture.disabled = true;
+            const originalContent = capture.innerHTML;
+            capture.innerHTML = `
+                <svg class="animate-spin w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Processing...</span>
+            `;
+            
+            // Capture image
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+            
+            // Send registration data
+            fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `name=${encodeURIComponent(nameInput.value)}&gender=${encodeURIComponent(genderInput.value)}&date_of_birth=${encodeURIComponent(dobInput.value)}&position=${encodeURIComponent(positionInput.value)}&address=${encodeURIComponent(addressInput.value)}&image=${encodeURIComponent(imageData)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showNotification('Registration failed: ' + data.error, 'error');
+                } else {
+                    showNotification('Employee registered successfully! Welcome to the team!', 'success');
+                    // Clear form after successful registration
+                    [nameInput, genderInput, dobInput, positionInput, addressInput].forEach(input => {
+                        input.value = '';
+                        input.dispatchEvent(new Event('blur'));
+                    });
+                }
+            })
+            .catch(error => {
+                showNotification('Network error occurred. Please check your connection and try again.', 'error');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                // Reset button state
+                capture.disabled = false;
+                capture.innerHTML = originalContent;
+            });
+        });
+
+        // Enhanced floating label functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.floating-label input, .floating-label select, .floating-label textarea').forEach(element => {
+                const label = element.nextElementSibling;
+                
+                function updateLabel() {
+                    if (element.value.trim() !== '' || (element.tagName === 'SELECT' && element.value !== '')) {
+                        label.style.top = '0.5rem';
+                        label.style.fontSize = '0.75rem';
+                        label.style.transform = 'translateY(0)';
+                        label.style.fontWeight = '600';
+                    } else {
+                        label.style.top = '50%';
+                        label.style.fontSize = '1rem';
+                        label.style.transform = 'translateY(-50%)';
+                        label.style.fontWeight = '500';
+                    }
+                }
+                
+                updateLabel(); // Initial check
+                
+                element.addEventListener('focus', updateLabel);
+                element.addEventListener('blur', updateLabel);
+                element.addEventListener('input', updateLabel);
+            });
+        });
+    </script>
+</body>
+</html>

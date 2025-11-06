@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Attendance{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* General Background */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            position: relative;
+
+        }
+        
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+        
+        /* Glass Card Base Style */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15); /* Slightly transparent white for glass effect */
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Specific Button Styles */
+        .btn-green {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-green:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-edit {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            color: white; /* Ensure text color remains white on hover */
+            text-decoration: none; /* Ensure no underline on hover */
+        }
+        
+        .btn-delete {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-delete:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+            border: none;
+        }
+        
+        .btn-back:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+        }
+        
+        /* Table Styles */
+        .table-container {
+            background: white; /* Solid white background for table */
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); /* Light gradient for header */
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .table-row {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .table-row:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            transform: scale(1.002);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Subtle shadow on hover */
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .employee-name {
+            font-weight: 600;
+            color: #1f2937; /* Darker text for readability */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .employee-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        /* Floating Shapes for Background */
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .shape {
+            position: absolute;
+            opacity: 0.03; /* More subtle */
+            animation: float 12s ease-in-out infinite; /* Slower, longer animation */
+        }
+        
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: -2s;
+            background: rgba(255, 255, 255, 0.2); /* White for contrast on gradient bg */
+        }
+        
+        .shape:nth-child(2) {
+            top: 60%;
+            right: 15%;
+            animation-delay: -6s;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .shape:nth-child(3) {
+            top: 30%;
+            left: 70%;
+            animation-delay: -4s;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(90deg); }
+            50% { transform: translateY(-40px) rotate(180deg); }
+            75% { transform: translateY(-20px) rotate(270deg); }
+        }
+        
+        /* Animations for Content */
+        .slide-in {
+            animation: slideIn 0.8s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        
+        /* Header Icon and Stats Cards */
+        .header-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            color: #1f2937; /* Dark text for contrast on light background */
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+        }
+
+        /* Flash message styling from base.html for consistency */
+        .flash-message { 
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out; 
+        }
+        .flash-message.bg-red-500 { background-color: #ef4444; }
+        .flash-message.bg-green-500 { background-color: #22c55e; }
+        .flash-message.bg-blue-500 { background-color: #3b82f6; }
+
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+</head>
+<body class="gradient-bg min-h-screen text-white flex flex-col">
+    <div class="fixed top-4 right-4 z-50 space-y-2">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message p-4 rounded-lg shadow-lg max-w-sm transform translate-x-0
+                        {% if category == 'error' %} bg-red-500
+                        {% elif category == 'success' %} bg-green-500
+                        {% else %} bg-blue-500 {% endif %} text-white">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="floating-shapes">
+        <div class="shape w-32 h-32 rounded-full"></div>
+        <div class="shape w-24 h-24 rounded-full"></div>
+        <div class="shape w-16 h-16 rounded-full"></div>
+    </div>
+
+    <div class="flex-grow container mx-auto p-6 flex flex-col items-center justify-center relative z-10">
+        <!-- Logo in top-left corner -->
+        <div class="absolute top-6 left-6 z-20">
+            <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Company Logo" class="h-14 w-auto"></a>
+        </div>
+        <div class="w-full max-w-7xl mx-auto">
+            <div class="text-center mb-12 slide-in">
+                <div class="header-icon">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </div>
+                <h1 class="text-5xl font-bold text-white mb-4">Admin Dashboard</h1>
+                <p class="text-white text-opacity-80 text-lg">Manage employees and monitor system performance</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 slide-in stagger-1">
+                <!-- Total Employees -->
+                <div class="stats-card">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="p-3 bg-blue-100 rounded-full">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a3.002 3.002 0 013.39-2.433m-.356 4.29a3.002 3.002 0 01-3.39-2.433m3.746 4.722a3.002 3.002 0 01-3.746-4.722M12 15v-3a3 3 0 00-3-3H9m3 3v-3a3 3 0 013-3h.008a3 3 0 013 3v3m-3 0h3m-3 0h-3m0-9a3 3 0 00-3-3H9a3 3 0 00-3 3v.008a3 3 0 003 3h.008a3 3 0 003-3V6z"></path></svg>
+                        </div>
+                    </div>
+                    <h3 class="text-4xl font-extrabold text-gray-800">{{ total_employees }}</h3>
+                    <p class="text-gray-500 font-medium">Total Employees</p>
+                </div>
+                <!-- Checked In Today -->
+                <div class="stats-card">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="p-3 bg-green-100 rounded-full">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+                    <h3 class="text-4xl font-extrabold text-gray-800">{{ checked_in_today_count }}</h3>
+                    <p class="text-gray-500 font-medium">Checked In Today</p>
+                </div>
+                <!-- Late Today -->
+                <div class="stats-card">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="p-3 bg-red-100 rounded-full">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+                    <h3 class="text-4xl font-extrabold text-gray-800">{{ late_today_count }}</h3>
+                    <p class="text-gray-500 font-medium">Late Today</p>
+                </div>
+            </div>
+
+            <!-- Monthly Stats Title -->
+            <div class="text-center my-12 slide-in stagger-2">
+                <h2 class="text-4xl font-bold text-white mb-3">This Month's Top Performers</h2>
+                <p class="text-white text-opacity-80">Analytics for the current month</p>
+            </div>
+
+            <!-- Monthly Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 slide-in stagger-3">
+                <!-- Top Attendance -->
+                <div class="stats-card">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="p-3 bg-purple-100 rounded-full">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-2 font-semibold uppercase tracking-wider">Highest Attendance</p>
+                    {% if top_attendance_employees %}
+                        <ol class="space-y-2 text-left">
+                            {% for employee in top_attendance_employees %}
+                            <li class="flex items-center justify-between text-sm">
+                                <span class="font-bold text-gray-800 truncate">{{ loop.index }}. {{ employee.name }}</span>
+                                <span class="text-gray-500 font-medium">{{ employee.attendance_count }} check-ins</span>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    {% else %}
+                        <p class="text-gray-500 font-medium mt-4">No attendance recorded this month.</p>
+                    {% endif %}
+                </div>
+                <!-- Top Early -->
+                <div class="stats-card">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="p-3 bg-green-100 rounded-full">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-2 font-semibold uppercase tracking-wider">Top Early Birds</p>
+                    {% if top_early_employees %}
+                        <ol class="space-y-2 text-left">
+                            {% for employee in top_early_employees %}
+                            <li class="flex items-center justify-between text-sm">
+                                <span class="font-bold text-gray-800 truncate">{{ loop.index }}. {{ employee.name }}</span>
+                                <span class="text-gray-500 font-medium">{{ employee.early_count }} times</span>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    {% else %}
+                        <p class="text-gray-500 font-medium mt-4">No early check-ins this month.</p>
+                    {% endif %}
+                </div>
+                <!-- Top Late -->
+                <div class="stats-card">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="p-3 bg-red-100 rounded-full">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-2 font-semibold uppercase tracking-wider">Most Late Check-ins</p>
+                    {% if top_late_employees %}
+                        <ol class="space-y-2 text-left">
+                            {% for employee in top_late_employees %}
+                            <li class="flex items-center justify-between text-sm">
+                                <span class="font-bold text-gray-800 truncate">{{ loop.index }}. {{ employee.name }}</span>
+                                <span class="text-gray-500 font-medium">{{ employee.late_count }} times</span>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    {% else %}
+                        <p class="text-gray-500 font-medium mt-4">No late check-ins this month.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+
+
+            <div class="glass-card rounded-3xl p-8 shadow-2xl slide-in stagger-2">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white mb-2">Employee Management</h2>
+                        <p class="text-white">Manage your team members and their information</p>
+                    </div>
+                    <div class="mt-4 sm:mt-0">
+                        <a href="{{ url_for('add_employee_manual') }}" class="btn-green text-white px-8 py-4 rounded-xl font-semibold flex items-center space-x-3 shadow-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            <span>Add New Employee</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="min-w-full">
+                        <thead class="table-header">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Employee</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Gender</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date of Birth</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Position</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Address</th>
+                                <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in employees %}
+                            <tr class="table-row">
+                                <td class="px-6 py-5">
+                                    <div class="employee-name">
+                                        <div class="employee-avatar">
+                                            {{ employee.name[0].upper() }}
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">{{ employee.name }}</div>
+                                            <div class="status-badge status-active">
+                                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                Active
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-5">
+                                    <span class="text-gray-700 font-medium">{{ employee.gender }}</span>
+                                </td>
+                                <td class="px-6 py-5">
+                                    <span class="text-gray-700">{{ employee.date_of_birth.strftime('%B %d, %Y') }}</span>
+                                </td>
+                                <td class="px-6 py-5">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {{ employee.position }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-5">
+                                    <span class="text-gray-700">{{ employee.address[:30] }}{% if employee.address|length > 30 %}...{% endif %}</span>
+                                </td>
+                                <td class="px-6 py-5 text-center">
+                                    <div class="flex items-center justify-center space-x-1">
+                                        <a href="{{ url_for('view_employee_details', employee_id=employee.id) }}" class="btn-edit" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                            View
+                                        </a>
+                                        <a href="{{ url_for('edit_employee_manual', employee_id=employee.id) }}" class="btn-edit">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                            Edit
+                                        </a>
+                                        
+                                        <form action="{{ url_for('delete_employee_manual', employee_id=employee.id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete {{ employee.name }}? This will also delete all their attendance records.');">
+                                            <button type="submit" class="btn-delete">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="px-6 py-12">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">
+                                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-2">No employees registered yet</h3>
+                                        <p class="text-gray-500 mb-6">Get started by adding your first employee to the system.</p>
+                                        <a href="{{ url_for('add_employee_manual') }}" class="btn-green text-white px-6 py-3 rounded-xl font-semibold inline-flex items-center space-x-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                            </svg>
+                                            <span>Add First Employee</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize current time display
+        function updateCurrentTime() {
+            const timeElement = document.getElementById('current-time');
+            if (timeElement && typeof moment !== 'undefined') {
+                timeElement.textContent = moment().format('HH:mm');
+            }
+        }
+        setInterval(updateCurrentTime, 1000); // Update every second
+        updateCurrentTime(); // Call immediately on load
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate cards on load
+            const cards = document.querySelectorAll('.slide-in');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+
+            // Add hover effects to table rows (already present in your original code, kept for completeness)
+            const tableRows = document.querySelectorAll('.table-row');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                });
+                
+                row.addEventListener('mouseleave', function() {
+                    this.style.boxShadow = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

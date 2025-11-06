@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Records - Smart Attendance</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+        
+        .table-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+        
+        .table-row {
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .table-row:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(8px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse { /* Added missing pulse keyframes */
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .status-early {
+            background: linear-gradient(45deg, #34d399, #6ee7b7);
+            color: #047857;
+            box-shadow: 0 0 15px rgba(52, 211, 153, 0.2);
+        }
+
+        .status-good {
+            background: linear-gradient(45deg, #60a5fa, #93c5fd);
+            color: #1e40af;
+            box-shadow: 0 0 15px rgba(96, 165, 250, 0.2);
+        }
+
+        .status-late {
+            background: linear-gradient(45deg, #f87171, #fca5a5);
+            color: #991b1b;
+            box-shadow: 0 0 15px rgba(248, 113, 113, 0.2);
+        }
+
+
+        .status-online {
+            background: linear-gradient(45deg, #10b981, #34d399);
+            color: white;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-offline {
+            background: linear-gradient(45deg, #ef4444, #f87171);
+            color: white;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .status-na {
+            background: linear-gradient(45deg, #6b7280, #9ca3af);
+            color: white;
+            box-shadow: 0 0 20px rgba(107, 114, 128, 0.3);
+        }
+        
+        .avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 1rem;
+            margin-right: 0.75rem;
+        }
+        
+        .gender-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .gender-male {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        
+        .gender-female {
+            background: linear-gradient(45deg, #ec4899, #be185d);
+            color: white;
+        }
+        
+        .table-cell {
+            padding: 1rem;
+            vertical-align: middle;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .table-cell:last-child {
+            border-right: none;
+        }
+
+        /* --- NEW RESPONSIVE STYLES --- */
+        @media (max-width: 767px) {
+            /* Force the table to not be a table anymore, 
+              but keep .table-container styles 
+            */
+            .table-container table,
+            .table-container thead,
+            .table-container tbody,
+            .table-container th,
+            .table-container td,
+            .table-container tr {
+                display: block;
+            }
+
+            /* Hide table headers (but not display: none;, for accessibility) */
+            .table-container thead {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            .table-container .table-row {
+                /* These become the "cards" */
+                margin-bottom: 1.5rem; /* mb-6 */
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 0.75rem; /* rounded-lg */
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            }
+            
+            .table-container .table-row:hover {
+                 /* Disable hover transform on mobile, or keep it if you like */
+                transform: none;
+            }
+
+            .table-container .table-cell {
+                /* Behave like a row */
+                position: relative;
+                padding-left: 50%; /* Make room for the label */
+                text-align: right;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .table-container .table-cell:last-child {
+                border-bottom: none;
+            }
+
+            .table-container .table-cell::before {
+                /* This is the data-label content */
+                content: attr(data-label);
+                position: absolute;
+                left: 1rem; /* p-4 */
+                width: 45%;
+                padding-right: 0.75rem; /* pr-3 */
+                font-weight: 600;
+                color: #9ca3af; /* text-gray-400 */
+                text-align: left;
+            }
+
+            /* --- Special styling for the first cell (Employee Name) --- */
+            /* We treat it as the "header" of the card */
+            .table-container tr.table-row td.table-cell:first-child {
+                background: rgba(255, 255, 255, 0.08);
+                padding-left: 1rem; /* Reset padding */
+                text-align: left;
+                font-size: 1.125rem; /* text-lg */
+            }
+
+            .table-container tr.table-row td.table-cell:first-child::before {
+                /* Hide the "Employee Name:" label for the header cell */
+                display: none;
+            }
+        }
+        /* --- END OF RESPONSIVE STYLES --- */
+
+    </style>
+</head>
+<body class="min-h-screen gradient-bg text-white">
+    <div class="container mx-auto p-6">
+        <!-- Logo in top-left corner -->
+        <div class="mb-6">
+            <a href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Company Logo" class="h-14 w-auto">
+            </a>
+        </div>
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Attendance Records
+            </h1>
+            <p class="text-xl text-gray-300">Real-time employee tracking dashboard</p>
+        </div>
+
+        <div class="rounded-2xl table-container">
+            <table class="min-w-full">
+                <thead class="hidden md:table-header-group">
+                    <tr class="table-header text-white">
+                        <th class="table-cell text-left font-semibold text-lg">Employee Name</th>
+                        <th class="table-cell text-left font-semibold text-lg">Gender</th>
+                        <th class="table-cell text-left font-semibold text-lg">Position</th>
+                        <th class="table-cell text-left font-semibold text-lg">Check In</th>
+                        <th class="table-cell text-left font-semibold text-lg">Check-in Status</th>
+                        <th class="table-cell text-left font-semibold text-lg">Check Out</th>
+                        <th class="table-cell text-left font-semibold text-lg">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="block md:table-row-group">
+                    {% for attendance in attendances %}
+                    <tr class="table-row border-b-0">
+                        <td class="table-cell" data-label="Employee Name">
+                            <div class="flex items-center">
+                                <div class="avatar">
+                                    {{ attendance.employee.name[0] }}
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-lg text-white">{{ attendance.employee.name }}</div>
+                                    <div class="text-sm text-gray-400">ID: #{{ attendance.employee.id }}</div> {# Using actual employee ID #}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="table-cell" data-label="Gender">
+                            <span class="gender-badge {% if attendance.employee.gender|lower == 'male' %}gender-male{% else %}gender-female{% endif %}">
+                                {{ attendance.employee.gender }}
+                            </span>
+                        </td>
+                        <td class="table-cell" data-label="Position">
+                            <div class="font-medium text-white">{{ attendance.employee.position }}</div>
+                            <div class="text-sm text-gray-400">Department</div> {# Placeholder if department isn't explicitly stored/linked #}
+                        </td>
+                        <td class="table-cell" data-label="Check In">
+                            {% if attendance.check_in %}
+                                <div class="font-mono text-green-400 text-lg">{{ attendance.check_in.strftime('%H:%M') }}</div>
+                                <div class="text-xs text-gray-400">{{ attendance.check_in.strftime('%Y-%m-%d') }}</div>
+                            {% else %}
+                                <div class="text-gray-500 font-mono">--:--</div>
+                                <div class="text-xs text-gray-500">Not checked in</div>
+                            {% endif %}
+                        </td>
+                        <td class="table-cell" data-label="Check-in Status">
+                            {% if attendance.check_in_status %}
+                                <span class="status-badge 
+                                    {% if attendance.check_in_status == 'Early' %}status-early
+                                    {% elif attendance.check_in_status == 'Good' %}status-good
+                                    {% elif attendance.check_in_status == 'Late' %}status-late{% endif %}">
+                                    {{ attendance.check_in_status }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="table-cell" data-label="Check Out">
+                            {% if attendance.check_out %}
+                                <div class="font-mono text-red-400 text-lg">{{ attendance.check_out.strftime('%H:%M') }}</div>
+                                <div class="text-xs text-gray-400">{{ attendance.check_out.strftime('%Y-%m-%d') }}</div>
+                            {% else %}
+                                <div class="text-orange-400 font-mono">Active</div>
+                                <div class="text-xs text-gray-400">Null</div>
+                            {% endif %}
+                        </td>
+                        <td class="table-cell" data-label="Status">
+                            {% if attendance.check_out %}
+                                <span class="status-badge status-offline">Offline</span>
+                            {% elif attendance.check_in %}
+                                {% if (now_utc - attendance.check_in).total_seconds() > 86400 %} {# 24 hours in seconds #}
+                                    <span class="status-badge status-offline">Offline</span>
+                                {% else %}
+                                    <span class="status-badge status-online">Online</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="status-badge status-na">N/A</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+
+    <script>
+        // Add staggered animation to table rows
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('.table-row');
+            
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    row.style.transition = 'all 0.5s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

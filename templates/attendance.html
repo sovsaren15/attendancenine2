@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Take Attendance - Smart Attendance</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .video-container {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 70%, rgba(102, 126, 234, 0.1) 100%);
+            pointer-events: none;
+        }
+        
+        .scan-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #10b981, transparent);
+            animation: scan 3s infinite;
+        }
+        
+        @keyframes scan {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(480px); opacity: 0; }
+        }
+        
+        .btn-check-in {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-check-in:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-check-out {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-check-out:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn-back {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+        }
+        
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 114, 128, 0.4);
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.8s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        
+        .status-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+        }
+        
+        .recognition-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .recognition-overlay.active {
+            opacity: 1;
+        }
+        
+        .corner-frame {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #10b981;
+        }
+        
+        .corner-frame.top-left {
+            top: 20px;
+            left: 20px;
+            border-right: none;
+            border-bottom: none;
+        }
+        
+        .corner-frame.top-right {
+            top: 20px;
+            right: 20px;
+            border-left: none;
+            border-bottom: none;
+        }
+        
+        .corner-frame.bottom-left {
+            bottom: 20px;
+            left: 20px;
+            border-right: none;
+            border-top: none;
+        }
+        
+        .corner-frame.bottom-right {
+            bottom: 20px;
+            right: 20px;
+            border-left: none;
+            border-top: none;
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .shape {
+            position: absolute;
+            opacity: 0.05;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: -2s;
+        }
+        
+        .shape:nth-child(2) {
+            top: 50%;
+            right: 15%;
+            animation-delay: -4s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen relative ">
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape w-32 h-32 bg-white rounded-full"></div>
+        <div class="shape w-24 h-24 bg-white rounded-full"></div>
+    </div>
+    
+    <!-- Logo in top-left corner -->
+    <a href="{{ url_for('index') }}" class="absolute top-6 left-6 z-20">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Company Logo" class="h-14 w-auto">
+    </a>
+
+    <div class="container mx-auto p-6 relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-8 slide-in">
+            <div class="inline-block p-3 glass-card rounded-full mb-4">
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0118.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-2">Take Attendance</h1>
+            <p class="text-white text-opacity-80">Position yourself in front of the camera for instant recognition</p>
+        </div>
+        
+        <!-- Main Content - Side by Side Layout -->
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-5 gap-8 items-start">
+                <!-- Camera Section - Left Side (3/5 width) -->
+                <div class="lg:col-span-3">
+                    <div class="glass-card rounded-3xl p-8 slide-in stagger-1">
+                        <div class="video-container rounded-2xl relative">
+                            <!-- Status Indicator -->
+                            <div class="status-indicator">
+                                <div class="flex items-center space-x-2 bg-black bg-opacity-50 rounded-full px-3 py-1">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                    <span class="text-white text-sm font-medium">Camera Active</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Corner Frames -->
+                            <div class="corner-frame top-left"></div>
+                            <div class="corner-frame top-right"></div>
+                            <div class="corner-frame bottom-left"></div>
+                            <div class="corner-frame bottom-right"></div>
+                            
+                            <!-- Video Element -->
+                            <video id="video" width="100%" height="480" autoplay class="w-full h-96 lg:h-[480px] object-cover rounded-2xl"></video>
+                            
+                            <!-- Scan Animation -->
+                            <div class="scan-animation"></div>
+                            
+                            <!-- Video Overlay -->
+                            <div class="video-overlay"></div>
+                            
+                            <!-- Recognition Overlay -->
+                            <div id="recognition-overlay" class="recognition-overlay">
+                                <div class="text-center">
+                                    <div class="inline-block relative mb-4">
+                                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
+                                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="absolute inset-0 w-16 h-16 bg-green-500 rounded-full pulse-ring"></div>
+                                    </div>
+                                    <p class="text-white font-semibold">Face Recognized!</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden Canvas -->
+                            <canvas id="canvas" class="hidden"></canvas>
+                        </div>
+                        
+                        <!-- Camera Instructions -->
+                        <div class="text-center mt-6">
+                            <div class="inline-flex items-center space-x-2 text-gray-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Look directly at the camera for best results</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons - Right Side (2/5 width) -->
+                <div class="lg:col-span-2">
+                    <div class="space-y-6">
+                        <!-- Check In Card -->
+                        <div class="glass-card rounded-3xl p-6 text-center slide-in stagger-2">
+                            <div class="mb-4">
+                                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 mb-3">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-3">Check In</h3>
+                            <p class="text-white text-opacity-80 text-sm mb-4">Start your work day with instant recognition</p>
+                            <button id="check_in" class="btn-check-in text-white px-6 py-3 rounded-xl font-semibold w-full flex items-center justify-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Check In Now</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Check Out Card -->
+                        <div class="glass-card rounded-3xl p-6 text-center slide-in stagger-3">
+                            <div class="mb-4">
+                                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 mb-3">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-3">Check Out</h3>
+                            <p class="text-white text-opacity-80 text-sm mb-4">End your work day and log your departure time</p>
+                            <button id="check_out" class="btn-check-out text-white px-6 py-3 rounded-xl font-semibold w-full flex items-center justify-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"></path>
+                                </svg>
+                                <span>Check Out Now</span>
+                            </button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const checkInButton = document.getElementById('check_in');
+        const checkOutButton = document.getElementById('check_out');
+        const recognitionOverlay = document.getElementById('recognition-overlay');
+
+        // Initialize camera
+        navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+            .then(stream => {
+                video.srcObject = stream;
+                video.setAttribute('playsinline', '');
+                showNotification('Camera initialized successfully', 'success');
+            })
+            .catch(err => {
+                console.error('Camera access denied:', err);
+                showNotification('Camera access denied. Please allow camera access and refresh the page.', 'error');
+            });
+
+        // Enhanced notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full max-w-sm`;
+            
+            const bgColor = type === 'error' ? 'bg-red-500' : 
+                           type === 'success' ? 'bg-green-500' : 
+                           type === 'processing' ? 'bg-blue-500' : 'bg-gray-500';
+            notification.className += ` ${bgColor} text-white`;
+            
+            const icon = type === 'error' ? 
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>' :
+                type === 'success' ?
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>' :
+                type === 'processing' ?
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>' :
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+            
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            ${icon}
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium">${message}</p>
+                    </div>
+                    ${type === 'processing' ? '<div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>' : ''}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto remove after duration
+            const duration = type === 'processing' ? 0 : 5000;
+            if (duration > 0) {
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }, duration);
+            }
+            
+            return notification;
+        }
+
+        // Show recognition animation
+        function showRecognitionAnimation() {
+            recognitionOverlay.classList.add('active');
+            setTimeout(() => {
+                recognitionOverlay.classList.remove('active');
+            }, 2000);
+        }
+
+        // Enhanced capture and send function
+        function captureAndSend(action) {
+            const actionText = action === 'check_in' ? 'Check In' : 'Check Out';
+            const button = action === 'check_in' ? checkInButton : checkOutButton;
+            
+            // Show processing notification
+            const processingNotification = showNotification(`Processing ${actionText}...`, 'processing');
+            
+            // Disable button
+            button.disabled = true;
+            const originalContent = button.innerHTML;
+            button.innerHTML = `
+                <div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                <span>Processing...</span>
+            `;
+            
+            // Show recognition animation
+            showRecognitionAnimation();
+            
+            // Capture image
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+            
+            // Send attendance data
+            fetch('/attendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=${encodeURIComponent(action)}&image=${encodeURIComponent(imageData)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove processing notification
+                if (document.body.contains(processingNotification)) {
+                    document.body.removeChild(processingNotification);
+                }
+                
+                if (data.error) {
+                    showNotification(`${actionText} failed: ${data.error}`, 'error');
+                } else {
+                    showNotification(`${actionText} successful! ${data.message}`, 'success');
+                }
+            })
+            .catch(error => {
+                // Remove processing notification
+                if (document.body.contains(processingNotification)) {
+                    document.body.removeChild(processingNotification);
+                }
+                showNotification(`Network error occurred. Please try again.`, 'error');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                // Re-enable button
+                button.disabled = false;
+                button.innerHTML = originalContent;
+            });
+        }
+
+        // Event listeners
+        checkInButton.addEventListener('click', () => captureAndSend('check_in'));
+        checkOutButton.addEventListener('click', () => captureAndSend('check_out'));
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'i' && e.ctrlKey) {
+                e.preventDefault();
+                captureAndSend('check_in');
+            } else if (e.key === 'o' && e.ctrlKey) {
+                e.preventDefault();
+                captureAndSend('check_out');
+            }
+        });
+        
+        // Add visual feedback for successful camera initialization
+        video.addEventListener('loadedmetadata', () => {
+            video.style.opacity = '0';
+            video.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                video.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

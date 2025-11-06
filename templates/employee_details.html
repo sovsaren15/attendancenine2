@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Details for {{ employee.name }} - Smart Attendance
+{% endblock %}
+
+{% block content %}
+<style>
+    .details-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #1f2937;
+    }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+    .info-item {
+        background: rgba(243, 244, 246, 0.7);
+        padding: 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(229, 231, 235, 0.8);
+    }
+    .info-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #4b5563;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .info-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #1f2937;
+    }
+    .table-container {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    .table-header {
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .table-row:hover {
+        background-color: #f9fafb;
+    }
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .status-early { background: #d1fae5; color: #065f46; }
+    .status-good { background: #dbeafe; color: #1e40af; }
+    .status-late { background: #fee2e2; color: #991b1b; }
+    .status-online { background: #10b981; color: white; }
+    .status-offline { background: #ef4444; color: white; }
+</style>
+
+<div class="w-full max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-10">
+        <div class="inline-block p-3 glass-card rounded-full mb-4">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl font-bold text-white">
+                {{ employee.name[0].upper() }}
+            </div>
+        </div>
+        <h1 class="text-4xl font-bold text-white mb-2">{{ employee.name }}</h1>
+        <p class="text-white text-opacity-80 text-lg">{{ employee.position }}</p>
+    </div>
+
+    <!-- Employee Details Card -->
+    <div class="details-card rounded-3xl p-8 shadow-2xl mb-10">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">Personal Information</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Employee ID</div>
+                <div class="info-value">#{{ employee.id }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Gender</div>
+                <div class="info-value">{{ employee.gender }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Date of Birth</div>
+                <div class="info-value">{{ employee.date_of_birth.strftime('%B %d, %Y') }}</div>
+            </div>
+            <div class="info-item col-span-1 md:col-span-2">
+                <div class="info-label">Address</div>
+                <div class="info-value">{{ employee.address }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance History -->
+    <div class="glass-card rounded-3xl p-8 shadow-2xl">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-white">Attendance History</h2>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-gray text-white px-6 py-2 rounded-xl font-semibold flex items-center space-x-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <span>Back to Dashboard</span>
+            </a>
+        </div>
+
+        <div class="table-container">
+            <table class="min-w-full text-gray-800">
+                <thead class="table-header">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Check In</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Check-in Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Check Out</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attendance in attendances %}
+                    <tr class="table-row border-b border-gray-200">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="font-medium">{{ attendance.check_in.strftime('%Y-%m-%d') }}</div>
+                            <div class="text-sm text-gray-500">{{ attendance.check_in.strftime('%A') }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if attendance.check_in_time %}
+                                <div class="font-mono text-green-600">{{ attendance.check_in_time }}</div>
+                            {% else %}
+                                <span class="text-gray-400">--:--</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if attendance.check_in_status %}
+                                <span class="status-badge 
+                                    {% if attendance.check_in_status == 'Early' %}status-early
+                                    {% elif attendance.check_in_status == 'Good' %}status-good
+                                    {% elif attendance.check_in_status == 'Late' %}status-late{% endif %}">
+                                    {{ attendance.check_in_status }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if attendance.check_out_time %}
+                                <div class="font-mono text-red-600">{{ attendance.check_out_time }}</div>
+                            {% else %}
+                                <span class="text-orange-500 font-semibold">Active</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if attendance.check_out %}
+                                <span class="status-badge status-offline">Offline</span>
+                            {% elif attendance.check_in %}
+                                {% if (now_utc - attendance.check_in).total_seconds() > 86400 %}
+                                    <span class="status-badge status-offline">Offline</span>
+                                {% else %}
+                                    <span class="status-badge status-online">Online</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-10">
+                            <div class="text-gray-500">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">No attendance records</h3>
+                                <p class="mt-1 text-sm text-gray-500">This employee has no attendance history yet.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

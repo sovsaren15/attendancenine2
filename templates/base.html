@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Attendance{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .hero-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); }
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.25); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.18); 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Added for subtle depth */
+        }
+        /* Button styles for admin and shared components */
+        .btn-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2); }
+        .btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(16, 185, 129, 0.2); }
+        .btn-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(239, 68, 68, 0.2); }
+        .btn-gray { background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(107, 114, 128, 0.2); }
+        
+        .btn-blue:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3); }
+        .btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3); }
+        .btn-red:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3); }
+        .btn-gray:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(107, 114, 128, 0.3); }
+
+        /* Styles for flash messages */
+        .flash-message { transition: transform 0.3s ease-out, opacity 0.3s ease-out; }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white flex flex-col">
+    <div class="fixed top-4 right-4 z-50 space-y-2">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message p-4 rounded-lg shadow-lg max-w-sm transform translate-x-0
+                        {% if category == 'error' %} bg-red-500
+                        {% elif category == 'success' %} bg-green-500
+                        {% else %} bg-blue-500 {% endif %} text-white">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="flex-grow container mx-auto p-6 flex flex-col items-center justify-center">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
