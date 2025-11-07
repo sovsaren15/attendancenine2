@@ -2,6 +2,7 @@ import cv2
 import face_recognition
 import numpy as np
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate 
 from datetime import datetime
